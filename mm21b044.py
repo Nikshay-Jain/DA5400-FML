@@ -181,48 +181,17 @@ print("Total MSE by Ridge =", mse_R)
 
 # ## Part (v)
 
-# Parameters for polynomial kernel
-deg = 2
-sig = np.arange(0.02,5,0.01)      # Do a linear search over the range of sigma to find the one that fits the best
+def poly_kernel(X1, X2, deg=2):
+    return (X1 @ X2.T + 1) ** deg
+    
+def krnl_regr(X, X_test, y, kernel_func):
+    K = kernel_func(X, X)
+    alpha = np.linalg.pinv(K) @ y
+    K_test = kernel_func(X_test, X)
+    return K_test @ alpha
 
-# Kernel functions
-def kernels(X, X_i, sig):
-    poly = (np.dot(X, X_i) + 1)**deg
-    gaus = np.exp(-np.sum((X - X_i)**deg, axis=1) / (2*sig**2))
-    return [poly, gaus]
-
-def kernel_regression_predict(X_train, y_train, X_test, sig):
-    pred_poly, pred_gaus = np.zeros(X_test.shape[0]), np.zeros(X_test.shape[0])
-
-    for i in range(X_test.shape[0]):
-        K_poly, K_gaus = kernels(X_train, X_test[i], sig)
-
-        pred_poly[i] = np.sum(K_poly * y_train) / np.sum(K_poly)
-        pred_gaus[i] = np.sum(K_gaus * y_train) / np.sum(K_gaus)
-    return [pred_poly,pred_gaus]
-
-gaussian_mse = []
-for i in sig:
-    pred_gaus = kernel_regression_predict(X, y, X_test, i)[1]
-    mse_gaus = np.mean((pred_gaus-y_test)**2)
-    gaussian_mse.append(mse_gaus)
-
-plt.plot(sig, gaussian_mse)
-plt.xlabel("Sigmas")
-plt.ylabel("MSE")
-plt.title("MSE vs sigma variation")
-plt.grid()
-plt.show()
-
-sig_opt = sig[np.argmin(gaussian_mse)]
-pred_poly, pred_gaus = kernel_regression_predict(X, y, X_test, sig_opt)
-
-mse_poly = np.mean((pred_poly - y_test)**2)
-mse_gaus = np.mean((pred_gaus - y_test)**2)
-
+y_poly_pred = krnl_regr(X, X_test, y, poly_kernel)
+mse_poly = np.mean((y_poly_pred - y_test)**2)
 print("Total MSE by Polynomial kernel =", mse_poly)
-print("Total MSE by Gaussian kernel =", mse_gaus)
 
-# Kernel Regression, especially gaussian kernel can model the data with high accuracy as it can capture the non linearities as well, which OLS misses out. On visualising the data, we find that it is certianly a non linear relationship which is governing it. Also, in the kernel regression the effect of outliers diminishes, making it more robust. Hence, the overall MSE of test data diminishes to a value lesser than ridge regression.
-# 
-# The gaussian kernel gives an abnormally low value in test data, which is due to the fact that it maps x to infintie dimention space and not just a quadratic space, as by the polynomial kernel. 
+# Kernel Regression, can model the data very well as it can capture the non linearities as well, which OLS misses out. On visualising the data, we find that it is certianly a non linear relationship (parabolic for both features to be precise) which is governing it. Also, in the kernel regression the effect of outliers diminishes, making it more robust. Hence, the overall MSE of test data diminishes to a value lesser than ridge regression.
