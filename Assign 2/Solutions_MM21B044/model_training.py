@@ -106,7 +106,7 @@ plt.ylabel("True Label")
 plt.title("Confusion Matrix")
 plt.show()
 
-fpr, tpr, thresholds = roc_curve(y_test, y_pred)
+fpr, tpr, thr = roc_curve(y_test, y_pred)
 roc_auc = auc(fpr, tpr)
 
 # Plot ROC curve
