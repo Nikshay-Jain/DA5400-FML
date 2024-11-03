@@ -11,8 +11,7 @@ def make_usable(text):
     text = re.sub(r'[^a-z\s]', '', text)    # Remove special characters and digits
     return text.split()
 
-def predict_email(words, alp = 1):
-    """Predicts if an email is spam (+1) or ham (0) based on the words in the email."""
+def predict(words, alp = 1):
     spam_score = np.log(p_spam)
     ham_score = np.log(p_ham)
 
@@ -32,7 +31,7 @@ def test_spam(folder_path='test', output_csv='predictions.csv'):
             with open(filepath, 'r') as file:
                 email_content = file.read()
                 words = make_usable(email_content)
-                prediction = predict_email(words)
+                prediction = predict(words)
                 results.append((filename, prediction))
 
     # Write results to CSV
