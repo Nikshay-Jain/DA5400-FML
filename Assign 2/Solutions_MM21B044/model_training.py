@@ -8,7 +8,6 @@ import pandas as pd
 from collections import Counter, defaultdict
 import matplotlib.pyplot as plt
 import seaborn as sns
-from sklearn.model_selection import train_test_split
 from sklearn.metrics import f1_score, confusion_matrix, roc_curve, auc
 
 data = pd.read_csv('enron_spam_data.csv')
@@ -29,7 +28,22 @@ def make_usable(text):
 
 data['body'] = (data['Message']).apply(make_usable)
 
-X_train, X_test, y_train, y_test = train_test_split(data['body'], data['label'], test_size=0.2)
+def split(X, y, test_size=0.2):
+    num_samples = len(X)
+    
+    indices = np.random.permutation(num_samples)
+    
+    num_test_samples = int(test_size * num_samples)
+    
+    test_indices = indices[:num_test_samples]
+    train_indices = indices[num_test_samples:]
+    
+    X_train, X_test = X.iloc[train_indices], X.iloc[test_indices]
+    y_train, y_test = y.iloc[train_indices], y.iloc[test_indices]
+    
+    return X_train, X_test, y_train, y_test
+
+X_train, X_test, y_train, y_test = split(data['body'], data['label'], test_size=0.2)
 
 # Get word frequencies for each class
 sp_word = []
